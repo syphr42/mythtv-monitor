@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2011 Gregory P. Moyer
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://syphr.org/mythtv/monitor/xsd/config/1.0" targetNamespace="http://syphr.org/mythtv/monitor/xsd/config/1.0"
+	elementFormDefault="qualified">
+
+	<xs:element name="config" type="ConfigType" />
+
+	<xs:complexType name="ConfigType">
+		<xs:sequence>
+			<xs:element name="mythtv" type="MythTvType" />
+			<xs:element name="transports" type="TransportsType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="MythTvType">
+		<xs:sequence>
+			<xs:element name="version" type="xs:string" />
+			<xs:element name="backends" minOccurs="0" type="BackendsType" />
+			<xs:element name="frontends" minOccurs="0" type="FrontendsType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="BackendsType">
+		<xs:sequence>
+			<xs:element name="master" type="BackendType" />
+			<xs:element name="slave" minOccurs="0" maxOccurs="unbounded"
+				type="BackendType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="BackendType">
+		<xs:sequence>
+			<xs:element name="host" type="xs:string" />
+			<xs:element name="httpPort" minOccurs="0" type="xs:int" />
+			<xs:element name="protocolPort" minOccurs="0" type="xs:int" />
+			<xs:element name="timeout" minOccurs="0" type="xs:long" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="FrontendsType">
+		<xs:sequence>
+			<xs:element name="frontend" minOccurs="1" maxOccurs="unbounded"
+				type="FrontendType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="FrontendType">
+		<xs:sequence>
+			<xs:element name="host" type="xs:string" />
+			<xs:element name="httpPort" minOccurs="0" type="xs:int" />
+			<xs:element name="controlPort" minOccurs="0" type="xs:int" />
+			<xs:element name="controlTimeout" minOccurs="0" type="xs:long" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="TransportsType">
+		<xs:sequence>
+			<xs:element name="transport" minOccurs="1" maxOccurs="unbounded"
+				type="TransportType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="TransportType">
+		<xs:sequence>
+			<xs:element name="type" type="xs:string" />
+			<xs:element name="configuration" minOccurs="0"
+				type="ConfigurationType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ConfigurationType">
+		<xs:sequence>
+			<xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax" />
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

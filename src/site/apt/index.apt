@@ -1,0 +1,5 @@
+MythTV Monitor
+
+  This application provides a configurable framework
+  for running jobs to interact with an existing MythTV
+  environment.
