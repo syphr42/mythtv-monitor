@@ -16,14 +16,12 @@
 package org.syphr.mythtv.monitor.config;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
-import org.syphr.mythtv.api.Backend;
 import org.syphr.mythtv.api.MythVersion;
-import org.syphr.mythtv.db.DatabaseException;
+import org.syphr.mythtv.api.backend.Backend;
 import org.syphr.mythtv.monitor.xsd.config.x10.BackendType;
 import org.syphr.mythtv.protocol.ConnectionType;
-import org.syphr.mythtv.protocol.EventLevel;
-import org.syphr.mythtv.util.exception.CommandException;
 
 public class BackendHost
 {
@@ -36,17 +34,24 @@ public class BackendHost
         this.version = version;
     }
 
-    public Backend connect(ConnectionType connectionType, EventLevel eventLevel) throws IOException,
-                                                                                CommandException,
-                                                                                DatabaseException
+    public Backend getBackend(ConnectionType connectionType)
     {
+        String localHost;
+        try
+        {
+            localHost = InetAddress.getLocalHost().getHostName();
+        }
+        catch (IOException e)
+        {
+            localHost = "localHost";
+        }
+
         Backend backend = new Backend(version);
-        backend.connect(getHost(),
-                        getProtocolPort(),
-                        getHttpPort(),
-                        getTimeout(),
-                        connectionType,
-                        eventLevel);
+        backend.setBackendConnectionParameters(localHost,
+                                               getHost(),
+                                               getProtocolPort(),
+                                               connectionType,
+                                               getHttpPort());
 
         return backend;
     }

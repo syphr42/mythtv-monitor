@@ -21,16 +21,13 @@ import java.util.List;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.syphr.mythtv.api.Backend;
+import org.syphr.mythtv.api.backend.Backend;
 import org.syphr.mythtv.data.DriveInfo;
-import org.syphr.mythtv.db.DatabaseException;
 import org.syphr.mythtv.monitor.Report;
 import org.syphr.mythtv.monitor.config.BackendHost;
 import org.syphr.mythtv.monitor.config.MonitorConfigException;
 import org.syphr.mythtv.monitor.config.MythTvEnvironment;
 import org.syphr.mythtv.protocol.ConnectionType;
-import org.syphr.mythtv.protocol.EventLevel;
-import org.syphr.mythtv.util.exception.CommandException;
 
 public class FreeSpace implements MythJob
 {
@@ -81,7 +78,7 @@ public class FreeSpace implements MythJob
         {
             try
             {
-                Backend backend = host.connect(ConnectionType.MONITOR, EventLevel.NONE);
+                Backend backend = host.getBackend(ConnectionType.MONITOR);
 
                 try
                 {
@@ -100,18 +97,10 @@ public class FreeSpace implements MythJob
                 }
                 finally
                 {
-                    backend.disconnect();
+                    backend.destroy();
                 }
             }
             catch (IOException e)
-            {
-                throw new JobExecutionException(e);
-            }
-            catch (CommandException e)
-            {
-                throw new JobExecutionException(e);
-            }
-            catch (DatabaseException e)
             {
                 throw new JobExecutionException(e);
             }

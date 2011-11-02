@@ -21,15 +21,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.quartz.JobExecutionContext;
-import org.syphr.mythtv.api.Backend;
-import org.syphr.mythtv.db.DatabaseException;
+import org.syphr.mythtv.api.backend.Backend;
 import org.syphr.mythtv.monitor.Report;
 import org.syphr.mythtv.monitor.config.BackendHost;
 import org.syphr.mythtv.monitor.config.MonitorConfigException;
 import org.syphr.mythtv.monitor.config.MythTvEnvironment;
 import org.syphr.mythtv.protocol.ConnectionType;
-import org.syphr.mythtv.protocol.EventLevel;
-import org.syphr.mythtv.util.exception.CommandException;
 
 public class Alive implements MythJob
 {
@@ -54,22 +51,19 @@ public class Alive implements MythJob
 
         for (BackendHost host : env.getAllBackends())
         {
+            Backend backend = host.getBackend(ConnectionType.MONITOR);
+
             try
             {
-                Backend backend = host.connect(ConnectionType.MONITOR, EventLevel.NONE);
-                backend.disconnect();
+                backend.getInfo();
             }
             catch (IOException e)
             {
                 downBackends.put(host.getHost(), e.getMessage());
             }
-            catch (CommandException e)
+            finally
             {
-                downBackends.put(host.getHost(), e.getMessage());
-            }
-            catch (DatabaseException e)
-            {
-                downBackends.put(host.getHost(), e.getMessage());
+                backend.destroy();
             }
         }
 

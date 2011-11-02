@@ -25,17 +25,14 @@ import java.util.List;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.syphr.mythtv.api.Backend;
+import org.syphr.mythtv.api.backend.Backend;
+import org.syphr.mythtv.api.backend.Recording;
 import org.syphr.mythtv.data.Program;
-import org.syphr.mythtv.data.UpcomingRecordings;
-import org.syphr.mythtv.db.DatabaseException;
 import org.syphr.mythtv.monitor.Report;
 import org.syphr.mythtv.monitor.config.BackendHost;
 import org.syphr.mythtv.monitor.config.MonitorConfigException;
 import org.syphr.mythtv.monitor.config.MythTvEnvironment;
 import org.syphr.mythtv.protocol.ConnectionType;
-import org.syphr.mythtv.protocol.EventLevel;
-import org.syphr.mythtv.util.exception.CommandException;
 
 public class Upcoming implements MythJob
 {
@@ -67,17 +64,17 @@ public class Upcoming implements MythJob
     {
         try
         {
-            Backend backend = master.connect(ConnectionType.MONITOR, EventLevel.NONE);
+            Backend backend = master.getBackend(ConnectionType.MONITOR);
 
             try
             {
-                UpcomingRecordings upcoming = backend.getUpcomingRecordings();
-
                 List<Program> today = new ArrayList<Program>();
                 List<Program> tomorrow = new ArrayList<Program>();
 
-                for (Program program : upcoming.getPrograms())
+                for (Recording recording : backend.getScheduledRecordings())
                 {
+                    Program program = recording.getProgram();
+
                     if (!isImportant(program))
                     {
                         continue;
@@ -99,7 +96,7 @@ public class Upcoming implements MythJob
 
                 final StringBuilder builder = new StringBuilder();
 
-                builder.append("Conflicts? ").append(upcoming.isConflicted()).append("\n\n");
+                builder.append("Conflicts? ").append(backend.isRecordingScheduleConflicted()).append("\n\n");
 
                 builder.append("Today:\n");
                 for (Program program : today)
@@ -132,18 +129,10 @@ public class Upcoming implements MythJob
             }
             finally
             {
-                backend.disconnect();
+                backend.destroy();
             }
         }
         catch (IOException e)
-        {
-            throw new JobExecutionException(e);
-        }
-        catch (CommandException e)
-        {
-            throw new JobExecutionException(e);
-        }
-        catch (DatabaseException e)
         {
             throw new JobExecutionException(e);
         }
