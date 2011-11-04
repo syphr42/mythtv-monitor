@@ -23,9 +23,10 @@
 
 	<xs:complexType name="OptionsType">
 		<xs:sequence>
-			<xs:element name="to" type="xs:string" />
-			<xs:element name="from" type="xs:string" />
-			<xs:element name="host" type="xs:string" />
+			<xs:element name="to" minOccurs="1" type="xs:string" />
+			<xs:element name="from" minOccurs="1" type="xs:string" />
+			<xs:element name="host" minOccurs="1" type="xs:string" />
+			<xs:element name="port" type="xs:int" />
 			<xs:element name="user" minOccurs="0" type="xs:string" />
 			<xs:element name="password" minOccurs="0" type="xs:string" />
 		</xs:sequence>

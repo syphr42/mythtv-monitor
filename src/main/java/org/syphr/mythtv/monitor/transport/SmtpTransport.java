@@ -42,6 +42,7 @@ public class SmtpTransport implements Transport
     private String from;
 
     private String host;
+    private int port;
     private String user;
     private String password;
 
@@ -58,6 +59,7 @@ public class SmtpTransport implements Transport
             to = options.getTo();
             from = options.getFrom();
             host = options.getHost();
+            port = options.getPort();
             user = options.getUser();
             password = options.getPassword();
         }
@@ -72,8 +74,13 @@ public class SmtpTransport implements Transport
     {
         Properties mailProps = new Properties();
         mailProps.put("mail.smtp.host", host);
+        if (port > 0)
+        {
+            mailProps.put("mail.smtp.port", port);
+        }
 
-        Session session = Session.getDefaultInstance(mailProps, new ConfigAuthenticator());
+        Authenticator auth = user != null ? new ConfigAuthenticator() : null;
+        Session session = Session.getDefaultInstance(mailProps, auth);
         MimeMessage message = new MimeMessage(session);
 
         try
