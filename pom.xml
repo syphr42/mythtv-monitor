@@ -47,7 +47,7 @@
 	</issueManagement>
 
 	<scm>
-		<url>https://github.com/syphr42/prom</url>
+		<url>https://github.com/syphr42/mythtv-monitor</url>
 		<connection>scm:git:git://github.com/syphr42/mythtv-monitor.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/syphr42/mythtv-monitor.git</developerConnection>
 	</scm>
