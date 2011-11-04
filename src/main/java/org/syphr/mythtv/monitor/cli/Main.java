@@ -176,9 +176,10 @@ public class Main
             {
                 jc.doConfigure(configStream);
             }
-            catch (JoranException je)
+            catch (JoranException e)
             {
-                throw new IOException("Failed to read logging configuration. The application library is corrupted.");
+                throw new IOException("Failed to read logging configuration. The application library is corrupted.",
+                                      e);
             }
         }
         finally
