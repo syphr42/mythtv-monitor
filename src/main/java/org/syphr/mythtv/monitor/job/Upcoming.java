@@ -29,10 +29,8 @@ import org.syphr.mythtv.api.backend.Backend;
 import org.syphr.mythtv.api.backend.Recording;
 import org.syphr.mythtv.data.Program;
 import org.syphr.mythtv.monitor.Report;
-import org.syphr.mythtv.monitor.config.BackendHost;
 import org.syphr.mythtv.monitor.config.MonitorConfigException;
 import org.syphr.mythtv.monitor.config.MythTvEnvironment;
-import org.syphr.mythtv.protocol.ConnectionType;
 
 public class Upcoming implements MythJob
 {
@@ -46,7 +44,7 @@ public class Upcoming implements MythJob
         }
     };
 
-    private BackendHost master;
+    private Backend master;
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException
@@ -64,14 +62,12 @@ public class Upcoming implements MythJob
     {
         try
         {
-            Backend backend = master.getBackend(ConnectionType.MONITOR);
-
             try
             {
                 List<Program> today = new ArrayList<Program>();
                 List<Program> tomorrow = new ArrayList<Program>();
 
-                for (Recording recording : backend.getScheduledRecordings())
+                for (Recording recording : master.getScheduledRecordings())
                 {
                     Program program = recording.getProgram();
 
@@ -96,7 +92,7 @@ public class Upcoming implements MythJob
 
                 final StringBuilder builder = new StringBuilder();
 
-                builder.append("Conflicts? ").append(backend.isRecordingScheduleConflicted()).append("\n\n");
+                builder.append("Conflicts? ").append(master.isRecordingScheduleConflicted()).append("\n\n");
 
                 builder.append("Today:\n");
                 for (Program program : today)
@@ -129,7 +125,7 @@ public class Upcoming implements MythJob
             }
             finally
             {
-                backend.destroy();
+                master.destroy();
             }
         }
         catch (IOException e)

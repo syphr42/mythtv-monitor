@@ -15,40 +15,87 @@
  */
 package org.syphr.mythtv.monitor.config;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.syphr.mythtv.api.MythVersion;
+import org.syphr.mythtv.api.backend.Backend;
+import org.syphr.mythtv.api.frontend.Frontend;
 import org.syphr.mythtv.monitor.xsd.config.x10.BackendType;
 import org.syphr.mythtv.monitor.xsd.config.x10.BackendsType;
+import org.syphr.mythtv.monitor.xsd.config.x10.FrontendType;
+import org.syphr.mythtv.monitor.xsd.config.x10.FrontendsType;
 import org.syphr.mythtv.monitor.xsd.config.x10.MythTvType;
+import org.syphr.mythtv.protocol.ConnectionType;
 
 public class MythTvEnvironment
 {
     private final MythVersion mythVersion;
 
-    private BackendHost masterBackend;
-    private final Map<String, BackendHost> slaveBackends;
+    private Backend masterBackend;
+    private final Map<String, Backend> slaveBackends;
 
-    // TODO frontends
+    private final Map<String, Frontend> frontends;
 
     public MythTvEnvironment(MythTvType config)
     {
         mythVersion = MythVersion.valueOf("_" + config.getVersion().replace('.', '_'));
 
-        slaveBackends = new HashMap<String, BackendHost>();
+        slaveBackends = new HashMap<String, Backend>();
         BackendsType backendsType = config.getBackends();
         if (backendsType != null)
         {
-            masterBackend = new BackendHost(backendsType.getMaster(), mythVersion);
+            masterBackend = buildBackend(backendsType.getMaster());
 
             for (BackendType slave : backendsType.getSlaveArray())
             {
-                slaveBackends.put(slave.getHost(), new BackendHost(slave, mythVersion));
+                slaveBackends.put(slave.getHost(), buildBackend(slave));
             }
         }
+
+        frontends = new HashMap<String, Frontend>();
+        FrontendsType frontendsType = config.getFrontends();
+        if (frontendsType != null)
+        {
+            for (FrontendType frontendType : frontendsType.getFrontendArray())
+            {
+                Frontend frontend = new Frontend(mythVersion);
+                frontend.setFrontendConnectionParameters(frontendType.getHost(),
+                                                         frontendType.getControlPort(),
+                                                         frontendType.getHttpPort());
+                frontend.setConnectionTimeout(frontendType.getControlTimeout(),
+                                              TimeUnit.MILLISECONDS);
+
+                frontends.put(frontendType.getHost(), frontend);
+            }
+        }
+    }
+
+    private Backend buildBackend(BackendType backendType)
+    {
+        String localHost;
+        try
+        {
+            localHost = InetAddress.getLocalHost().getHostName();
+        }
+        catch (IOException e)
+        {
+            localHost = "localHost";
+        }
+
+        Backend backend = new Backend(mythVersion);
+        backend.setBackendConnectionParameters(localHost,
+                                               backendType.getHost(),
+                                               backendType.getProtocolPort(),
+                                               ConnectionType.MONITOR, // TODO
+                                               backendType.getHttpPort());
+
+        return backend;
     }
 
     public MythVersion getMythVersion()
@@ -56,25 +103,38 @@ public class MythTvEnvironment
         return mythVersion;
     }
 
-    public BackendHost getMasterBackend()
+    public Backend getMasterBackend()
     {
         return masterBackend;
     }
 
-    public List<BackendHost> getAllBackends()
+    public List<Backend> getSlaveBackends()
     {
-        // TODO
-        return Collections.singletonList(getMasterBackend());
+        return new ArrayList<Backend>(slaveBackends.values());
     }
 
-    public BackendHost getBackend(String host)
+    public List<Backend> getAllBackends()
+    {
+        List<Backend> backends = new ArrayList<Backend>();
+        backends.add(masterBackend);
+        backends.addAll(slaveBackends.values());
+
+        return backends;
+    }
+
+    public Backend getBackend(String host)
     {
         // TODO
-        if (masterBackend.getHost().equals(host))
-        {
-            return masterBackend;
-        }
-
         return null;
+    }
+
+    public List<Frontend> getAllFrontends()
+    {
+        return new ArrayList<Frontend>(frontends.values());
+    }
+
+    public Frontend getFrontend(String host)
+    {
+        return frontends.get(host);
     }
 }

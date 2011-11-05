@@ -22,11 +22,10 @@ import java.util.Map.Entry;
 
 import org.quartz.JobExecutionContext;
 import org.syphr.mythtv.api.backend.Backend;
+import org.syphr.mythtv.api.frontend.Frontend;
 import org.syphr.mythtv.monitor.Report;
-import org.syphr.mythtv.monitor.config.BackendHost;
 import org.syphr.mythtv.monitor.config.MonitorConfigException;
 import org.syphr.mythtv.monitor.config.MythTvEnvironment;
-import org.syphr.mythtv.protocol.ConnectionType;
 
 public class Alive implements MythJob
 {
@@ -49,17 +48,15 @@ public class Alive implements MythJob
         Map<String, String> downBackends = new HashMap<String, String>();
         Map<String, String> downFrontends = new HashMap<String, String>();
 
-        for (BackendHost host : env.getAllBackends())
+        for (Backend backend : env.getAllBackends())
         {
-            Backend backend = host.getBackend(ConnectionType.MONITOR);
-
             try
             {
                 backend.getInfo();
             }
             catch (IOException e)
             {
-                downBackends.put(host.getHost(), e.getMessage());
+                downBackends.put(backend.getHost(), e.getMessage());
             }
             finally
             {
@@ -67,7 +64,21 @@ public class Alive implements MythJob
             }
         }
 
-        // TODO frontends
+        for (Frontend frontend : env.getAllFrontends())
+        {
+            try
+            {
+                frontend.getInfo();
+            }
+            catch (IOException e)
+            {
+                downFrontends.put(frontend.getHost(), e.getMessage());
+            }
+            finally
+            {
+                frontend.destroy();
+            }
+        }
 
         if (downBackends.isEmpty() && downFrontends.isEmpty())
         {

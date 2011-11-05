@@ -24,16 +24,14 @@ import org.quartz.JobExecutionException;
 import org.syphr.mythtv.api.backend.Backend;
 import org.syphr.mythtv.data.DriveInfo;
 import org.syphr.mythtv.monitor.Report;
-import org.syphr.mythtv.monitor.config.BackendHost;
 import org.syphr.mythtv.monitor.config.MonitorConfigException;
 import org.syphr.mythtv.monitor.config.MythTvEnvironment;
-import org.syphr.mythtv.protocol.ConnectionType;
 
 public class FreeSpace implements MythJob
 {
     private static final String NEWLINE = "\n";
 
-    private List<BackendHost> hosts;
+    private List<Backend> backends;
 
     private double warningThreshold = 0.90;
     private double criticalThreshold = 0.95;
@@ -67,19 +65,17 @@ public class FreeSpace implements MythJob
     @Override
     public void configure(MythTvEnvironment environment) throws MonitorConfigException
     {
-        hosts.addAll(environment.getAllBackends());
+        backends.addAll(environment.getAllBackends());
     }
 
     public Report perform() throws JobExecutionException
     {
         final StringBuilder reportBuilder = new StringBuilder();
 
-        for (BackendHost host : hosts)
+        for (Backend backend : backends)
         {
             try
             {
-                Backend backend = host.getBackend(ConnectionType.MONITOR);
-
                 try
                 {
                     List<DriveInfo> drives = backend.getInfo().getDrives();
