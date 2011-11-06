@@ -58,10 +58,6 @@ public class Alive implements MythJob
             {
                 downBackends.put(backend.getHost(), e.getMessage());
             }
-            finally
-            {
-                backend.destroy();
-            }
         }
 
         for (Frontend frontend : env.getAllFrontends())
@@ -73,10 +69,6 @@ public class Alive implements MythJob
             catch (IOException e)
             {
                 downFrontends.put(frontend.getHost(), e.getMessage());
-            }
-            finally
-            {
-                frontend.destroy();
             }
         }
 

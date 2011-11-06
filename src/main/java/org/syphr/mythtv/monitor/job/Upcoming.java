@@ -62,71 +62,64 @@ public class Upcoming implements MythJob
     {
         try
         {
-            try
+            List<Program> today = new ArrayList<Program>();
+            List<Program> tomorrow = new ArrayList<Program>();
+
+            for (Recording recording : master.getScheduledRecordings())
             {
-                List<Program> today = new ArrayList<Program>();
-                List<Program> tomorrow = new ArrayList<Program>();
+                Program program = recording.getProgram();
 
-                for (Recording recording : master.getScheduledRecordings())
+                if (!isImportant(program))
                 {
-                    Program program = recording.getProgram();
-
-                    if (!isImportant(program))
-                    {
-                        continue;
-                    }
-
-                    if (isToday(program))
-                    {
-                        today.add(program);
-                    }
-
-                    if (isTomorrow(program))
-                    {
-                        tomorrow.add(program);
-                    }
+                    continue;
                 }
 
-                Collections.sort(today, PROGRAM_COMPARATOR);
-                Collections.sort(tomorrow, PROGRAM_COMPARATOR);
-
-                final StringBuilder builder = new StringBuilder();
-
-                builder.append("Conflicts? ").append(master.isRecordingScheduleConflicted()).append("\n\n");
-
-                builder.append("Today:\n");
-                for (Program program : today)
+                if (isToday(program))
                 {
-                    builder.append('\t').append(format(program)).append("\n");
+                    today.add(program);
                 }
-                builder.append('\n');
 
-                builder.append("Tomorrow:\n");
-                for (Program program : tomorrow)
+                if (isTomorrow(program))
                 {
-                    builder.append('\t').append(format(program)).append("\n");
+                    tomorrow.add(program);
                 }
-                builder.append('\n');
-
-                return new Report()
-                {
-                    @Override
-                    public String getTitle()
-                    {
-                        return "MythTV - Upcoming Recordings";
-                    }
-
-                    @Override
-                    public String getBody()
-                    {
-                        return builder.toString();
-                    }
-                };
             }
-            finally
+
+            Collections.sort(today, PROGRAM_COMPARATOR);
+            Collections.sort(tomorrow, PROGRAM_COMPARATOR);
+
+            final StringBuilder builder = new StringBuilder();
+
+            builder.append("Conflicts? ").append(master.isRecordingScheduleConflicted()).append("\n\n");
+
+            builder.append("Today:\n");
+            for (Program program : today)
             {
-                master.destroy();
+                builder.append('\t').append(format(program)).append("\n");
             }
+            builder.append('\n');
+
+            builder.append("Tomorrow:\n");
+            for (Program program : tomorrow)
+            {
+                builder.append('\t').append(format(program)).append("\n");
+            }
+            builder.append('\n');
+
+            return new Report()
+            {
+                @Override
+                public String getTitle()
+                {
+                    return "MythTV - Upcoming Recordings";
+                }
+
+                @Override
+                public String getBody()
+                {
+                    return builder.toString();
+                }
+            };
         }
         catch (IOException e)
         {

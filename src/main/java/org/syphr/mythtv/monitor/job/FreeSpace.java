@@ -76,24 +76,17 @@ public class FreeSpace implements MythJob
         {
             try
             {
-                try
+                List<DriveInfo> drives = backend.getInfo().getDrives();
+                for (DriveInfo drive : drives)
                 {
-                    List<DriveInfo> drives = backend.getInfo().getDrives();
-                    for (DriveInfo drive : drives)
+                    DriveAnalyzer analyzer = new DriveAnalyzer(drive);
+
+                    if (analyzer.isWarning() || analyzer.isCritical())
                     {
-                        DriveAnalyzer analyzer = new DriveAnalyzer(drive);
-
-                        if (analyzer.isWarning() || analyzer.isCritical())
-                        {
-                            reportBuilder.append(analyzer);
-                            reportBuilder.append(NEWLINE);
-                        }
-
+                        reportBuilder.append(analyzer);
+                        reportBuilder.append(NEWLINE);
                     }
-                }
-                finally
-                {
-                    backend.destroy();
+
                 }
             }
             catch (IOException e)
