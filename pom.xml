@@ -140,13 +140,14 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>2.1.0</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>2.1.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -154,7 +155,7 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.codehaus.janino</groupId>
 			<artifactId>janino</artifactId>
@@ -170,4 +171,75 @@
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>debian</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<version>1.5</version>
+
+						<executions>
+							<execution>
+								<id>shade-deps</id>
+
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+							</execution>
+						</executions>
+
+						<configuration>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
+								</filter>
+							</filters>
+						</configuration>
+					</plugin>
+
+					<!-- The deb plug-in must come after the shade plug-in to ensure the 
+						full jar is built first. -->
+					<plugin>
+						<groupId>org.vafer</groupId>
+						<artifactId>jdeb</artifactId>
+						<version>0.8</version>
+
+						<executions>
+							<execution>
+								<id>build-deb</id>
+
+								<phase>package</phase>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+
+								<configuration>
+									<controlDir>src/packaging/debian</controlDir>
+									<installDir>/var/lib/${project.artifactId}</installDir>
+
+									<dataSet>
+										<data>
+											<src>${project.build.directory}/${project.build.finalName}.jar</src>
+											<type>file</type>
+										</data>
+									</dataSet>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

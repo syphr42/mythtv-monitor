@@ -1,0 +1,36 @@
+#
+# Copyright 2011 Gregory P. Moyer
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# MythTV Monitor Upstart Script
+description "start and stop MythTV Monitor"
+version "1.0"
+author "Gregory P. Moyer"
+
+# System Configuration
+JAVA_HOME=/usr/lib/jvm/java-6-openjdk
+COMMONS_DAEMON=/usr/share/java/commons-daemon.jar
+JSVC=/usr/bin/jsvc
+
+# MythTV Monitor Configuration
+MMON_USER=mmon
+MMON_HOME=/var/lib/mythtv-monitor
+MMON_LOG=/var/log/mythtv-monitor.log
+MMON_PID=/var/run/mythtv-monitor.pid
+
+script
+exec $JSVC -home $JAVA_HOME -server -cp $COMMONS_DAEMON:$MMON_HOME/mythtv-monitor.jar -pidfile $MMON_PID -errfile \&1 -outfile $MMON_LOG -user $MMON_USER org.syphr.mythtv.monitor.cli.Daemon
+emit mythtv-monitor_running
+end script

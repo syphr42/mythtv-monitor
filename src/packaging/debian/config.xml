@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://syphr.org/mythtv/monitor/xsd/config/1.0" xmlns:smtp="http://syphr.org/mythtv/monitor/xsd/smtp/1.0"
+	xsi:schemaLocation="http://syphr.org/mythtv/monitor/xsd/config/1.0 http://syphr.org/mythmon/xsd/config-1.0.xsd">
+
+	<mythtv>
+		<version>0.24</version>
+
+		<backends>
+			<master>
+				<host>mythmaster</host>
+			</master>
+            <slave>
+                <host>mythslave</host>
+            </slave>
+		</backends>
+
+		<frontends>
+			<frontend>
+				<host>mythfront</host>
+			</frontend>
+		</frontends>
+	</mythtv>
+
+	<transports>
+		<transport>
+			<type>org.syphr.mythtv.monitor.transport.SmtpTransport</type>
+
+			<configuration>
+				<smtp:options>
+					<smtp:to>user@localhost</smtp:to>
+					<smtp:from>mythtv-monitor@localhost</smtp:from>
+					<smtp:host>localhost</smtp:host>
+					<smtp:user>mmon</smtp:user>
+					<smtp:password>password</smtp:password>
+				</smtp:options>
+			</configuration>
+		</transport>
+	</transports>
+</config>

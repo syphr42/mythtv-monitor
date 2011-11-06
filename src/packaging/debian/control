@@ -1,0 +1,11 @@
+Package: [[name]]
+Version: [[version]]
+Architecture: all
+Section: misc
+Priority: extra
+Maintainer: Gregory P. Moyer <moyerg@syphr.com>
+Homepage: http://www.syphr.org/mythtv-monitor
+Depends: java-gcj-compat, jsvc, libcommons-daemon-java
+Description: MythTV Monitor is a utility meant to 
+ run in the background to keep an eye on any 
+ aspect of your MythTV environment.
