@@ -49,6 +49,23 @@ public class Main
 
     public static void main(String[] args)
     {
+        Monitor monitor = buildMonitor(args);
+
+        try
+        {
+            monitor.start();
+        }
+        catch (MonitorException e)
+        {
+            LOGGER.error(e.getMessage(), e);
+
+            System.out.println("Monitor failed to start: " + e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    public static Monitor buildMonitor(String[] args)
+    {
         CommandLineParser parser = new PosixParser();
         CommandLine cl;
         try
@@ -60,7 +77,7 @@ public class Main
             LOGGER.error(e.getMessage(), e);
             dumpUsage("Failed to parse command line: " + e.getMessage());
 
-            return; // appease javac
+            return null; // appease javac
         }
 
         if (CliOption.HELP.hasOption(cl))
@@ -94,29 +111,17 @@ public class Main
             LOGGER.error(e.getMessage(), e);
             dumpUsage("Failed to read config file: " + e.getMessage());
 
-            return; // appease javac
+            return null; // appease javac
         }
         catch (MonitorConfigException e)
         {
             LOGGER.error(e.getMessage(), e);
             dumpUsage("Failed to parse config file: " + e.getMessage());
 
-            return; // appease javac
+            return null; // appease javac
         }
 
-        LOGGER.info("Starting monitor");
-        Monitor monitor = new QuartzMonitor(config);
-        try
-        {
-            monitor.start();
-        }
-        catch (MonitorException e)
-        {
-            LOGGER.error(e.getMessage(), e);
-
-            System.out.println("MythTV Monitor failed to start. See log for details.");
-            System.exit(1);
-        }
+        return new QuartzMonitor(config);
     }
 
     private static void dumpUsage(String errorMsg)
