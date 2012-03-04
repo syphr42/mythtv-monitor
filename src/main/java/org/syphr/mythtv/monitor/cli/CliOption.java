@@ -22,7 +22,7 @@ import org.apache.commons.cli.Options;
 public enum CliOption
 {
     HELP(new Option("h", "help", false, "show this usage text")),
-    QUIET(new Option("q", "quiet", false, "supress all console output")),
+    QUIET(new Option("q", "quiet", false, "suppress all console output")),
     LOG_FILE(new Option("f", "logfile", true, "log file")),
     LOG_LEVEL(new Option("l", "loglevel", true, "log verbosity level")),
     LOG_CONFIG(new Option("g",
