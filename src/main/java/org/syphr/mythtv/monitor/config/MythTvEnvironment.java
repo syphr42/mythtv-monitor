@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.syphr.mythtv.api.MythVersion;
 import org.syphr.mythtv.api.backend.Backend;
 import org.syphr.mythtv.api.frontend.Frontend;
@@ -31,10 +33,11 @@ import org.syphr.mythtv.monitor.xsd.config.x10.BackendsType;
 import org.syphr.mythtv.monitor.xsd.config.x10.FrontendType;
 import org.syphr.mythtv.monitor.xsd.config.x10.FrontendsType;
 import org.syphr.mythtv.monitor.xsd.config.x10.MythTvType;
-import org.syphr.mythtv.protocol.ConnectionType;
 
 public class MythTvEnvironment
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MythTvEnvironment.class);
+
     private final MythVersion mythVersion;
 
     private Backend masterBackend;
@@ -42,7 +45,7 @@ public class MythTvEnvironment
 
     private final Map<String, Frontend> frontends;
 
-    public MythTvEnvironment(MythTvType config)
+    public MythTvEnvironment(MythTvType config) throws MonitorConfigException
     {
         mythVersion = MythVersion.valueOf("_" + config.getVersion().replace('.', '_'));
 
@@ -50,11 +53,27 @@ public class MythTvEnvironment
         BackendsType backendsType = config.getBackends();
         if (backendsType != null)
         {
-            masterBackend = buildBackend(backendsType.getMaster());
+            try
+            {
+                masterBackend = buildBackend(backendsType.getMaster());
+            }
+            catch (IOException e)
+            {
+                throw new MonitorConfigException("Failed to connect to master backend", e);
+            }
 
             for (BackendType slave : backendsType.getSlaveArray())
             {
-                slaveBackends.put(slave.getHost(), buildBackend(slave));
+                try
+                {
+                    slaveBackends.put(slave.getHost(), buildBackend(slave));
+                }
+                catch (IOException e)
+                {
+                    LOGGER.error("Failed to connect to slave backend "
+                            + slave.getHost()
+                            + "; it will not be available for monitoring", e);
+                }
             }
         }
 
@@ -76,7 +95,7 @@ public class MythTvEnvironment
         }
     }
 
-    private Backend buildBackend(BackendType backendType)
+    private Backend buildBackend(BackendType backendType) throws IOException
     {
         String localHost;
         try
@@ -85,14 +104,13 @@ public class MythTvEnvironment
         }
         catch (IOException e)
         {
-            localHost = "localHost";
+            localHost = "localhost";
         }
 
         Backend backend = new Backend(mythVersion);
         backend.setBackendConnectionParameters(localHost,
                                                backendType.getHost(),
                                                backendType.getProtocolPort(),
-                                               ConnectionType.MONITOR, // TODO
                                                backendType.getHttpPort());
 
         return backend;
